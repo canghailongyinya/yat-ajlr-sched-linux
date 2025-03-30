@@ -36,6 +36,7 @@
 #include <linux/sched/nohz.h>
 #include <linux/sched/rseq_api.h>
 #include <linux/sched/rt.h>
+#include <linux/sched/yat.h>
 
 #include <linux/blkdev.h>
 #include <linux/context_tracking.h>
@@ -65,6 +66,7 @@
 #include <linux/vtime.h>
 #include <linux/wait_api.h>
 #include <linux/workqueue_api.h>
+//#include <linux/console.h>
 
 #ifdef CONFIG_PREEMPT_DYNAMIC
 # ifdef CONFIG_GENERIC_ENTRY
@@ -7064,6 +7066,12 @@ static void __setscheduler_prio(struct task_struct *p, int prio)
 {
 	if (dl_prio(prio))
 		p->sched_class = &dl_sched_class;
+#ifdef CONFIG_SCHED_CLASS_YAT
+	else if (yat_prio(prio)){
+		p->sched_class = &yat_sched_class;
+		printk("\n\n======select yat yat yat yat======\n\n");
+	}
+#endif
 	else if (rt_prio(prio))
 		p->sched_class = &rt_sched_class;
 	else
@@ -9903,9 +9911,13 @@ void __init sched_init(void)
 	int i;
 
 	/* Make sure the linker didn't screw up */
-	BUG_ON(&idle_sched_class != &fair_sched_class + 1 ||
-	       &fair_sched_class != &rt_sched_class + 1 ||
+	BUG_ON(&idle_sched_class != &yat_sched_class + 1 ||
+			&yat_sched_class != &fair_sched_class + 1 ||
+			&fair_sched_class != &rt_sched_class + 1 ||
 	       &rt_sched_class   != &dl_sched_class + 1);
+	// BUG_ON(&idle_sched_class != &fair_sched_class + 1 ||
+	// 	&fair_sched_class != &rt_sched_class + 1 ||
+	// 	&rt_sched_class   != &dl_sched_class + 1);
 #ifdef CONFIG_SMP
 	BUG_ON(&dl_sched_class != &stop_sched_class + 1);
 #endif
@@ -9971,6 +9983,10 @@ void __init sched_init(void)
 		rq->calc_load_update = jiffies + LOAD_FREQ;
 		init_cfs_rq(&rq->cfs);
 		init_rt_rq(&rq->rt);
+#ifdef CONFIG_SCHED_CLASS_YAT
+		printk(KERN_EMERG "======init yat rq======\n");
+		init_yat_rq(&rq->yat);
+#endif
 		init_dl_rq(&rq->dl);
 #ifdef CONFIG_FAIR_GROUP_SCHED
 		INIT_LIST_HEAD(&rq->leaf_cfs_rq_list);

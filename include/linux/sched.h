@@ -796,9 +796,15 @@ struct task_struct {
 
 	struct sched_entity		se;
 	struct sched_rt_entity		rt;
+//	struct sched_yat_entity		yat;
 	struct sched_dl_entity		dl;
 	struct sched_dl_entity		*dl_server;
 	const struct sched_class	*sched_class;
+
+//	struct list_head yat_run_list; // 用于 YAT 调度器的任务链表
+//#ifdef CONFIG_SCHED_CLASS_YAT
+    struct list_head run_list; // 用于 yat 调度器的任务链表
+//#endif
 
 #ifdef CONFIG_SCHED_CORE
 	struct rb_node			core_node;

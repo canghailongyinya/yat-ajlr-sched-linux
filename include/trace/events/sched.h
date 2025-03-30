@@ -748,6 +748,10 @@ DECLARE_TRACE(pelt_rt_tp,
 	TP_PROTO(struct rq *rq),
 	TP_ARGS(rq));
 
+// DECLARE_TRACE(pelt_yat_tp,
+// 	TP_PROTO(struct rq *rq),
+// 	TP_ARGS(rq));
+	
 DECLARE_TRACE(pelt_dl_tp,
 	TP_PROTO(struct rq *rq),
 	TP_ARGS(rq));

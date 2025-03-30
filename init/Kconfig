@@ -1,4 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0-only
+config SCHED_CLASS_YAT
+	bool "My YAT sched class"
+	default n
+	help
+		A simple try
+	
 config CC_VERSION_TEXT
 	string
 	default "$(CC_VERSION_TEXT)"

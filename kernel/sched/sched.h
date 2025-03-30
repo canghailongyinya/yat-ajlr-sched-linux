@@ -185,10 +185,23 @@ static inline int dl_policy(int policy)
 {
 	return policy == SCHED_DEADLINE;
 }
+#ifdef CONFIG_SCHED_CLASS_YAT
+static inline int yat_policy(int policy)
+{
+	printk(KERN_EMERG "====================================yat_policy======================================\n");
+ 	return policy == SCHED_YAT;
+}
+#endif
 static inline bool valid_policy(int policy)
 {
+#ifdef CONFIG_SCHED_CLASS_YAT
+	printk(KERN_EMERG "====================================valid_policy======================================\n");
 	return idle_policy(policy) || fair_policy(policy) ||
-		rt_policy(policy) || dl_policy(policy);
+	rt_policy(policy) || dl_policy(policy) || yat_policy(policy);
+#else
+	return idle_policy(policy) || fair_policy(policy) ||
+	rt_policy(policy) || dl_policy(policy);
+#endif
 }
 
 static inline int task_has_idle_policy(struct task_struct *p)
@@ -200,6 +213,13 @@ static inline int task_has_rt_policy(struct task_struct *p)
 {
 	return rt_policy(p->policy);
 }
+
+#ifdef CONFIG_SCHED_CLASS_YAT
+static inline int task_has_yat_policy(struct task_struct *p)
+{
+	return yat_policy(p->policy);
+}
+#endif
 
 static inline int task_has_dl_policy(struct task_struct *p)
 {
@@ -343,6 +363,7 @@ extern void dl_server_init(struct sched_dl_entity *dl_se, struct rq *rq,
 #ifdef CONFIG_CGROUP_SCHED
 
 struct cfs_rq;
+struct yat_rq;
 struct rt_rq;
 
 extern struct list_head task_groups;
@@ -685,6 +706,11 @@ static inline int rt_bandwidth_enabled(void)
 # define HAVE_RT_PUSH_IPI
 #endif
 
+struct yat_rq {
+	struct list_head tasks; // 任务链表
+	int nr_running;         // 正在运行的任务数
+};
+
 /* Real-Time classes' related field in a runqueue: */
 struct rt_rq {
 	struct rt_prio_array	active;
@@ -1013,6 +1039,7 @@ struct rq {
 #endif
 
 	struct cfs_rq		cfs;
+	struct yat_rq		yat;
 	struct rt_rq		rt;
 	struct dl_rq		dl;
 
@@ -2363,6 +2390,7 @@ extern const struct sched_class stop_sched_class;
 extern const struct sched_class dl_sched_class;
 extern const struct sched_class rt_sched_class;
 extern const struct sched_class fair_sched_class;
+extern const struct sched_class yat_sched_class;
 extern const struct sched_class idle_sched_class;
 
 static inline bool sched_stop_runnable(struct rq *rq)
@@ -2458,6 +2486,7 @@ extern void update_max_interval(void);
 
 extern void init_sched_dl_class(void);
 extern void init_sched_rt_class(void);
+extern void init_sched_yat_class(void);
 extern void init_sched_fair_class(void);
 
 extern void reweight_task(struct task_struct *p, int prio);
@@ -2892,6 +2921,7 @@ static inline void resched_latency_warn(int cpu, u64 latency) {}
 #endif /* CONFIG_SCHED_DEBUG */
 
 extern void init_cfs_rq(struct cfs_rq *cfs_rq);
+extern void init_yat_rq(struct yat_rq *yat_rq);
 extern void init_rt_rq(struct rt_rq *rt_rq);
 extern void init_dl_rq(struct dl_rq *dl_rq);
 

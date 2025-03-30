@@ -28,7 +28,9 @@ endif
 # These compilation units have roughly the same size and complexity - so their
 # build parallelizes well and finishes roughly at once:
 #
+obj-$(CONFIG_SCHED_CLASS_YAT) += yat.o
 obj-y += core.o
 obj-y += fair.o
+obj-y += yat.o
 obj-y += build_policy.o
 obj-y += build_utility.o
